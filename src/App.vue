@@ -1,11 +1,21 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const text = ref("hello");
+const trimmedText = computed(() => text.value.trim());
 const posts = ref([]);
 
 function addPost() {
-  posts.value.push(text.value);
+  const newPost = {
+    id: Math.random().toString(36).substring(2),
+    content: trimmedText.value,
+    createdAt: new Date(),
+    author: {
+      userName: "John Doe",
+      avatarUrl: "https://i.pravatar.cc/89",
+    },
+  };
+  posts.value.push(newPost);
   text.value = "";
 }
 
@@ -19,12 +29,21 @@ function deletePost(index) {
     <div class="container">
       <form class="card" @submit.prevent="addPost">
         <textarea name="post" id="post" placeholder="Quoi de neuf ?" v-model="text"></textarea>
-        <button type="submit">Publier</button>
+        <button type="submit" :disabled="!trimmedText.length">Publier</button>
       </form>
 
-      <p v-for="(post, index) in posts" :key="index">
-        {{ post }} <button type="button" @click="deletePost(index)">suppriemr</button>
-      </p>
+      <p v-if="!posts.length">Aucun post pour l'instant</p>
+
+      <article class="card" v-for="(post, index) in posts" :key="index">
+        <div class="post-header">
+          <img :src="post.author.avatarUrl" alt="Avatar" width="50rem" />
+          <a>{{ post.author.userName }}</a>
+        </div>
+        er
+
+        <p>{{ post.content }}</p>
+        <button type="button" @click="deletePost(index)">Supprimer</button>
+      </article>
     </div>
   </main>
 </template>
@@ -70,5 +89,30 @@ button {
   font-size: 1rem;
   height: 40px;
   padding: 0 1rem;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+article {
+  padding: 1rem;
+  overflow: hidden;
+}
+
+article p {
+  white-space: pre-wrap;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.post-header img {
+  border-radius: 50%;
 }
 </style>
